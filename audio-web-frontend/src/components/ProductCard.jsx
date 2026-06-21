@@ -1,31 +1,31 @@
 import './ProductCard.css';
 
-export default function ProductCard() {
+// REMOVED the curly braces around props here
+export default function ProductCard(props) {
   return (
     <div className="product-card">
       <div className="image-container">
-        <img
-          src="https://xmobile.lk/wp-content/uploads/2023/10/JBL-PartyBox-Encore-Essential-Portable-Bluetooth-Speaker-1.png"
-          alt="JBL PartyBox Encore Essential"
-        />
+        <img src={props.image} alt={props.title} />
       </div>
 
       <div className="product-info">
-        <h3>JBL PartyBox Encore Essential</h3>
+        <h3>{props.title}</h3>
 
-        <p className="description">
-          Portable Bluetooth speaker with powerful bass and up to 6 hours of
-          battery life.
-        </p>
+        <p className="description">{props.description}</p>
 
         <div className="price-section">
-          <span className="rent-price">Rs. 3,500/day</span>
-          <span className="buy-price">Rs. 145,000</span>
+          <span className="rent-price">Rs. {props.rentPrice}/day</span>
+          <span className="buy-price">Rs. {props.buyPrice}</span>
         </div>
 
         <div className="card-footer">
-          <span className="status">✅ Available</span>
-          <button className="book-btn">Book Now</button>
+          {/* Added props. to isAvailable here */}
+          <span className="status">
+            {props.isAvailable ? "✅ Available" : "❌ Out of Stock"}
+          </span>
+          <button className="book-btn" disabled={!props.isAvailable}>
+            {props.isAvailable ? "Book Now" : "Unavailable"}
+          </button>
         </div>
       </div>
     </div>
