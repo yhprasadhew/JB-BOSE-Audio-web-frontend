@@ -1,0 +1,99 @@
+/* Card Container Layout */
+.product-card {
+  width: 320px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden; /* Ensures absolutely nothing spills out of the card */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #ffffff;
+}
+
+/* Image Container Box - Forces fixed height bounds */
+.image-container {
+  width: 100% !important;
+  height: 220px !important; /* Explicitly locks the height of the image zone */
+  background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Image Constraints - Stops global CSS from expanding the picture */
+.image-container img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important; /* Forces the speaker image to scale proportionally inside the box */
+}
+
+/* Content Area styling */
+.product-info {
+  padding: 20px;
+}
+
+.product-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  color: #333333;
+}
+
+.description {
+  margin: 0 0 16px 0;
+  font-size: 0.9rem;
+  color: #666666;
+  line-height: 1.4;
+}
+
+/* Pricing Grid */
+.price-section {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.rent-price {
+  font-weight: bold;
+  color: #e65100;
+  font-size: 1.1rem;
+}
+
+.buy-price {
+  font-size: 0.9rem;
+  color: #888888;
+  text-decoration: line-through;
+}
+
+/* Footer Element (Status & Button Flex) */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #2e7d32;
+}
+
+/* Action Button styling */
+.book-btn {
+  padding: 10px 20px;
+  background-color: #0070f3;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.book-btn:hover {
+  background-color: #0051bb;
+}
