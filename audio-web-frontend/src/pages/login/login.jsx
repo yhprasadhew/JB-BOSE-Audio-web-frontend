@@ -1,24 +1,55 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
+import axios from "axios";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Login submit logic
-    console.log("Submitting login:", { email, password });
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/users/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      console.log("Login Success:", response.data);
+
+      // Save token if backend returns one
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
+      alert("Login Successful ✅");
+
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        error.response?.data?.message ||
+          "Login Failed ❌"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-[#F7F5F0] flex items-center justify-center px-4 py-12">
-      
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-black/5 p-8 relative overflow-hidden">
-        
-        {/* Decorative top bar */}
+        {/* TOP ACCENT BAR */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#FFB648] via-[#e59d2f] to-[#FFB648]" />
 
         {/* LOGO */}
@@ -35,22 +66,23 @@ export default function LoginPage() {
           </h1>
 
           <p className="text-sm text-gray-500 mt-1.5">
-            Sign in to access your JB-BOSE account
+            Sign in to your JB-BOSE account
           </p>
         </div>
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-5">
-
-          {/* Email Address */}
+          {/* EMAIL */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
               Email Address
             </label>
+
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                 <Mail className="w-4 h-4" />
               </span>
+
               <input
                 type="email"
                 required
@@ -62,15 +94,17 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Password */}
+          {/* PASSWORD */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
               Password
             </label>
+
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                 <Lock className="w-4 h-4" />
               </span>
+
               <input
                 type="password"
                 required
@@ -82,47 +116,46 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Remember me & Forgot Password */}
+          {/* REMEMBER + FORGOT */}
           <div className="flex justify-between items-center text-sm pt-1">
             <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="w-4 h-4 accent-[#FFB648] rounded border-gray-300 focus:ring-[#FFB648]" 
+              <input
+                type="checkbox"
+                className="w-4 h-4 accent-[#FFB648]"
               />
               Remember me
             </label>
 
-            <a
-              href="#"
+            <button
+              type="button"
               className="text-xs text-[#FFB648] font-semibold hover:underline"
             >
               Forgot Password?
-            </a>
+            </button>
           </div>
 
-          {/* Submit Button */}
+          {/* LOGIN BUTTON */}
           <button
             type="submit"
-            className="w-full py-3 bg-[#0B0F1A] text-white rounded-lg font-semibold hover:bg-black transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+            disabled={loading}
+            className="w-full py-3 bg-[#0B0F1A] text-white rounded-lg font-semibold hover:bg-black transition-colors duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
-
         </form>
 
         {/* FOOTER */}
         <p className="text-center text-sm text-gray-500 mt-8 pt-6 border-t border-gray-100">
           Don't have an account?{" "}
           <button
+            type="button"
             onClick={() => navigate("/register")}
-            className="text-[#FFB648] font-semibold hover:underline bg-transparent border-none p-0 focus:outline-none"
+            className="text-[#FFB648] font-semibold hover:underline"
           >
             Register
           </button>
         </p>
-
       </div>
-
     </div>
   );
 }
