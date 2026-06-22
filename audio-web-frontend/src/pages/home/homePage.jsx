@@ -4,6 +4,8 @@ import HomeContent from "./HomeContent";
 import ProductsPage from "./ProductsPage";
 import RentalsPage from "./RentalsPage";
 import ContactPage from "./contactPage";
+import LoginPage from "../login/login";
+import RegisterPage from "../register/register";
 
 export default function HomePage() {
   return (
@@ -14,6 +16,8 @@ export default function HomePage() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="rentals" element={<RentalsPage />} />
         <Route path="contact" element={<ContactPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
       </Routes>
     </div>
   );
