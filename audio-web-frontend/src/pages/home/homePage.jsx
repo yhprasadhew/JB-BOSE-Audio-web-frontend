@@ -6,6 +6,7 @@ import RentalsPage from "./RentalsPage";
 import ContactPage from "./contactPage";
 import LoginPage from "../login/login";
 import RegisterPage from "../register/register";
+import EditProfilePage from "../profile/EditProfilePage";
 
 export default function HomePage() {
   return (
@@ -18,6 +19,7 @@ export default function HomePage() {
         <Route path="contact" element={<ContactPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="edit-profile" element={<EditProfilePage />} />
       </Routes>
     </div>
   );
