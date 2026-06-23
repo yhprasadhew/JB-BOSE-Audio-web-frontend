@@ -3,13 +3,14 @@ import {
   FaCalendarCheck,
   FaBoxOpen,
   FaUsers,
-  FaHeadphones,
   FaSignOutAlt,
 } from "react-icons/fa";
 
 import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
+import ItemsAdmin from "./ItemsAdmin";
+import BookingsAdmin from "./BookingsAdmin";
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -129,7 +130,7 @@ export default function AdminPage() {
       </div>
 
       {/* MAIN CONTENT (LIGHT THEME) */}
-      <div className="flex-1 p-8 bg-[#F7F5F0]">
+      <div className="flex-1 p-8 bg-[#F7F5F0] overflow-y-auto">
 
         <Routes>
 
@@ -169,8 +170,8 @@ export default function AdminPage() {
             }
           />
 
-          <Route path="booking" element={<h1>Booking Page</h1>} />
-          <Route path="items" element={<h1>Items Page</h1>} />
+          <Route path="booking" element={<BookingsAdmin />} />
+          <Route path="items" element={<ItemsAdmin />} />
           <Route path="users" element={<h1>Users Page</h1>} />
 
         </Routes>

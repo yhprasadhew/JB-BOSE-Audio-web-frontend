@@ -33,6 +33,7 @@ export default function LoginPage() {
         const payload = login(response.data.token);
         
         toast.success(`Welcome back, ${payload.firstName || "User"}! 👋`);
+        
 
         // Role-based routing
         if (payload.role === "admin") {

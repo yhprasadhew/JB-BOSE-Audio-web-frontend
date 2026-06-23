@@ -1,8 +1,28 @@
-import { Sliders, ShieldCheck, Clock, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sliders, ShieldCheck, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function HomeContent() {
   const navigate = useNavigate();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/products");
+        // Take only available products, and slice to show only 3
+        const available = response.data.filter((p) => p.availability === true);
+        setFeaturedProducts(available.slice(0, 3));
+      } catch (error) {
+        console.error("Error fetching featured products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
 
   return (
     <>
@@ -84,6 +104,93 @@ export default function HomeContent() {
 
         </div>
 
+      </section>
+
+      {/* FEATURED ITEMS SECTION */}
+      <section className="w-full bg-[#10131F]/5 border-t border-black/[0.03] py-24">
+        <div className="max-w-7xl mx-auto px-6 md:px-16 space-y-12">
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div className="space-y-3">
+              <span className="text-xs font-bold tracking-[0.2em] uppercase text-[#FFB648]">
+                Featured Collection
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0B0F1A] leading-tight">
+                Our Most Popular Equipment
+              </h2>
+              <p className="text-sm text-gray-500 max-w-md">
+                Handpicked premium gear available for both sale and short-term rentals.
+              </p>
+            </div>
+            
+            <button
+              onClick={() => navigate("/products")}
+              className="group flex items-center gap-2 px-6 py-3 border border-[#0B0F1A]/10 bg-white hover:bg-gray-50 text-[#0B0F1A] text-sm rounded-lg font-semibold shadow-sm transition-all duration-300"
+            >
+              View More Items
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#FFB648]" />
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="w-8 h-8 text-[#FFB648] animate-spin" />
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="bg-white border border-black/5 rounded-2xl p-12 text-center text-gray-400">
+              No featured items available right now.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredProducts.map((product) => (
+                <div
+                  key={product.key}
+                  className="bg-white rounded-2xl border border-black/5 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col group"
+                >
+                  <div className="w-full h-56 bg-[#fbfbfb] p-4 flex items-center justify-center relative overflow-hidden border-b border-gray-50">
+                    <img
+                      src={product.image?.[0]}
+                      alt={product.name}
+                      className="max-w-full max-h-full object-contain group-hover:scale-105 transition duration-500"
+                      onError={(e) => {
+                        e.target.src = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
+                      }}
+                    />
+                    <span className={`absolute top-4 left-4 px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                      product.type === "rental" ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"
+                    }`}>
+                      {product.type === "rental" ? "For Rental" : "For Sale"}
+                    </span>
+                  </div>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-[#0B0F1A] line-clamp-1">{product.name}</h3>
+                      <p className="text-xs text-gray-400 font-mono">{product.dimension}</p>
+                      <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                        {product.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-gray-50 flex items-center justify-between">
+                      <p className="text-base font-bold text-[#0B0F1A]">
+                        LKR {product.price.toLocaleString()}
+                        {product.type === "rental" && <span className="text-[10px] text-gray-400 font-normal"> /day</span>}
+                      </p>
+                      <button
+                        onClick={() => navigate(product.type === "rental" ? "/rentals" : "/products")}
+                        className="px-4 py-2 bg-[#0B0F1A] text-white text-xs font-semibold rounded-lg hover:bg-black transition duration-300"
+                      >
+                        Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+        </div>
       </section>
 
       {/* CORE VALUE PROPOSITIONS */}
