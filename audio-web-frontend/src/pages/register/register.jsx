@@ -1,27 +1,58 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, ShieldCheck } from "lucide-react";
+import { User, Mail, Lock, Phone, MapPin, ShieldCheck } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logic for registration would go here
-    console.log("Registering:", { name, email, password, agreeTerms });
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match ❌");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://localhost:3000/api/users", {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        password,
+      });
+
+      console.log("Registration Success:", response.data);
+      toast.success("Registration Successful ✅ Please sign in.");
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration Error:", error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || "Registration Failed ❌";
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-[#F7F5F0] flex items-center justify-center px-4 py-12">
       
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-black/5 p-8 relative overflow-hidden">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-black/5 p-8 relative overflow-hidden">
         
-        {/* Decorative elements */}
+        {/* Decorative top bar */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#FFB648] via-[#e59d2f] to-[#FFB648]" />
 
         {/* LOGO */}
@@ -37,42 +68,63 @@ export default function RegisterPage() {
             Create an Account
           </h1>
 
-          <p className="text-sm text-gray-500 mt-1.5 text-center max-w-[280px]">
-            Join JB-BOSE Audio to book, manage, and explore premium sound systems.
+          <p className="text-sm text-gray-500 mt-1.5 text-center">
+            Register to rent & buy premium sound systems
           </p>
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Full Name */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
-              Full Name
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
-                <User className="w-4 h-4" />
-              </span>
-              <input
-                type="text"
-                required
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
-              />
+          {/* Name Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
+                First Name
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <User className="w-3.5 h-3.5" />
+                </span>
+                <input
+                  type="text"
+                  required
+                  placeholder="John"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
+                Last Name
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <User className="w-3.5 h-3.5" />
+                </span>
+                <input
+                  type="text"
+                  required
+                  placeholder="Doe"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
+                />
+              </div>
             </div>
           </div>
 
           {/* Email Address */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
               Email Address
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
-                <Mail className="w-4 h-4" />
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <Mail className="w-3.5 h-3.5" />
               </span>
               <input
                 type="email"
@@ -80,87 +132,108 @@ export default function RegisterPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
+                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
               />
             </div>
           </div>
 
-          {/* Password */}
+          {/* Phone Number */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
-              Password
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
+              Phone Number
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
-                <Lock className="w-4 h-4" />
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <Phone className="w-3.5 h-3.5" />
               </span>
               <input
-                type="password"
+                type="tel"
                 required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
+                placeholder="0771234567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
               />
             </div>
           </div>
 
-          {/* Confirm Password */}
+          {/* Address */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
-              Confirm Password
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
+              Address
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
-                <ShieldCheck className="w-4 h-4" />
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <MapPin className="w-3.5 h-3.5" />
               </span>
               <input
-                type="password"
+                type="text"
                 required
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
+                placeholder="No. 12, Galle Road, Colombo"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
               />
             </div>
           </div>
 
-          {/* Terms & Conditions */}
-          <div className="flex items-start gap-2.5 text-sm pt-1">
-            <input
-              type="checkbox"
-              id="terms"
-              required
-              checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-[#FFB648] rounded border-gray-300 focus:ring-[#FFB648]"
-            />
-            <label htmlFor="terms" className="text-xs text-gray-500 leading-normal">
-              I agree to the{" "}
-              <a href="#" className="text-[#FFB648] font-medium hover:underline">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="#" className="text-[#FFB648] font-medium hover:underline">
-                Privacy Policy
-              </a>
-            </label>
+          {/* Password Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <Lock className="w-3.5 h-3.5" />
+                </span>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </span>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFB648] focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 bg-[#0B0F1A] text-white rounded-lg font-semibold hover:bg-black transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+            disabled={loading}
+            className="w-full mt-2 py-3 bg-[#0B0F1A] text-white rounded-lg font-semibold hover:bg-black transition-colors duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
 
         </form>
 
         {/* FOOTER */}
-        <p className="text-center text-sm text-gray-500 mt-8 pt-6 border-t border-gray-100">
+        <p className="text-center text-sm text-gray-500 mt-6 pt-5 border-t border-gray-100">
           Already have an account?{" "}
           <button
+            type="button"
             onClick={() => navigate("/login")}
             className="text-[#FFB648] font-semibold hover:underline bg-transparent border-none p-0 focus:outline-none"
           >

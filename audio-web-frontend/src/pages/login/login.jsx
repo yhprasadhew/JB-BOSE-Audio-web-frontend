@@ -2,9 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-hot-toast";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,21 +29,24 @@ export default function LoginPage() {
 
       console.log("Login Success:", response.data);
 
-      // Save token if backend returns one
       if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
+        const payload = login(response.data.token);
+        
+        toast.success(`Welcome back, ${payload.firstName || "User"}! 👋`);
+
+        // Role-based routing
+        if (payload.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      } else {
+        toast.error("Login failed: no token received ❌");
       }
-
-      alert("Login Successful ✅");
-
-      navigate("/");
     } catch (error) {
       console.error(error);
-
-      alert(
-        error.response?.data?.message ||
-          "Login Failed ❌"
-      );
+      const errorMessage = error.response?.data?.message || "Login Failed ❌";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -150,7 +156,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => navigate("/register")}
-            className="text-[#FFB648] font-semibold hover:underline"
+            className="text-[#FFB648] font-semibold hover:underline bg-transparent border-none p-0 focus:outline-none"
           >
             Register
           </button>
@@ -159,4 +165,3 @@ export default function LoginPage() {
     </div>
   );
 }
-//
