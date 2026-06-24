@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Tag, Layers, Settings, CircleDollarSign } from "lucide-react";
+import { Plus, Trash2, Edit, Image, Tag, Layers } from "lucide-react";
+import { API_BASE_URL } from "../../config/api";
 
 export default function ItemsAdmin() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Form State
+  // Create Form State
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [price, setPrice] = useState("");
@@ -18,7 +21,7 @@ export default function ItemsAdmin() {
   const [type, setType] = useState("sale");
   const [adding, setAdding] = useState(false);
 
-  // Auto-generate key from name
+  // Auto-generate key from name for new items
   useEffect(() => {
     const generatedKey = name
       .toLowerCase()
@@ -31,7 +34,7 @@ export default function ItemsAdmin() {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3000/api/products", {
+      const response = await axios.get(`${API_BASE_URL}/api/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(response.data);
@@ -64,7 +67,7 @@ export default function ItemsAdmin() {
     };
 
     try {
-      await axios.post("http://localhost:3000/api/products", payload, {
+      await axios.post(`${API_BASE_URL}/api/products`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Product added successfully! 🚀");
@@ -90,7 +93,7 @@ export default function ItemsAdmin() {
 
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:3000/api/products/${productKey}`, {
+      await axios.delete(`${API_BASE_URL}/api/products/${productKey}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Product deleted successfully! 🗑️");
@@ -108,7 +111,7 @@ export default function ItemsAdmin() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-5">
         <div>
           <h1 className="text-3xl font-extrabold text-[#0B0F1A] tracking-tight">Manage Inventory</h1>
-          <p className="text-sm text-gray-500 mt-1">Add, review, and delete sales or rental products.</p>
+          <p className="text-sm text-gray-500 mt-1">Add, edit, review, and delete sales or rental products.</p>
         </div>
       </div>
 
@@ -261,7 +264,7 @@ export default function ItemsAdmin() {
                       e.target.src = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
                     }}
                   />
-                  <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex-1 min-w-0 space-y-1 pr-14">
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                         product.type === "rental" ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"
@@ -275,13 +278,22 @@ export default function ItemsAdmin() {
                     <p className="text-sm font-semibold text-[#FFB648]">LKR {product.price.toLocaleString()}</p>
                   </div>
 
-                  <button
-                    onClick={() => handleDeleteProduct(product.key)}
-                    className="absolute top-3 right-3 p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-colors"
-                    title="Delete item"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="absolute top-3 right-3 flex items-center gap-1">
+                    <button
+                      onClick={() => navigate(`/admin/items/edit/${product.key}`)}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-[#FFB648] hover:bg-amber-50/50 transition-colors"
+                      title="Edit item"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.key)}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-colors"
+                      title="Delete item"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -289,6 +301,7 @@ export default function ItemsAdmin() {
         </div>
 
       </div>
+
     </div>
   );
 }

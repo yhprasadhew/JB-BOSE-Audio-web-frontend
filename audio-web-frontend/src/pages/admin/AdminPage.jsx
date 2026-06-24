@@ -11,6 +11,8 @@ import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
 import ItemsAdmin from "./ItemsAdmin";
 import BookingsAdmin from "./BookingsAdmin";
+import UsersAdmin from "./UsersAdmin";
+import EditItemAdmin from "./EditItemAdmin";
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -172,7 +174,8 @@ export default function AdminPage() {
 
           <Route path="booking" element={<BookingsAdmin />} />
           <Route path="items" element={<ItemsAdmin />} />
-          <Route path="users" element={<h1>Users Page</h1>} />
+          <Route path="items/edit/:key" element={<EditItemAdmin />} />
+          <Route path="users" element={<UsersAdmin />} />
 
         </Routes>
 

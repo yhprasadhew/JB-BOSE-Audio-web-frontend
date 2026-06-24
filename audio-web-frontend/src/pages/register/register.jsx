@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Phone, MapPin, ShieldCheck } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { API_BASE_URL } from "../../config/api";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3000/api/users", {
+      const response = await axios.post(`${API_BASE_URL}/api/users`, {
         firstName,
         lastName,
         email,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { CircleDollarSign, Layers, Compass, Loader2 } from "lucide-react";
+import { API_BASE_URL } from "../../config/api";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -9,7 +10,7 @@ export default function ProductsPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/products");
+        const response = await axios.get(`${API_BASE_URL}/api/products`);
         // Filter only Sale type and available products
         const saleProducts = response.data.filter(
           (p) => p.type === "sale" && p.availability === true

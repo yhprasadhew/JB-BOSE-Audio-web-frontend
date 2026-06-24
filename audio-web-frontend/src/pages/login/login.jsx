@@ -4,6 +4,7 @@ import { Mail, Lock } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
+import { API_BASE_URL } from "../../config/api";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/users/login",
+        `${API_BASE_URL}/api/users/login`,
         {
           email,
           password,
@@ -33,7 +34,6 @@ export default function LoginPage() {
         const payload = login(response.data.token);
         
         toast.success(`Welcome back, ${payload.firstName || "User"}! 👋`);
-        
 
         // Role-based routing
         if (payload.role === "admin") {

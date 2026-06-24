@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { User, Mail, Phone, MapPin, Image, Save, ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { API_BASE_URL } from "../../config/api";
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ export default function EditProfilePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        "http://localhost:3000/api/users/profile",
+        `${API_BASE_URL}/api/users/profile`,
         {
           firstName,
           lastName,
@@ -112,11 +113,11 @@ export default function EditProfilePage() {
         <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-gray-100 mb-8">
           <div className="relative group">
             <img
-              src={profilePicture || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmyS4TygDepDH2AezAFSACrY7V3HuBaXl_Zq7E0d5jD-QW-7ZjPaV1KNY&s=10"}
+              src={profilePicture || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmyS4TygDepDH2AezAFSACrY7V3HuBaXl_Zq7E0d5jD-QW-7ZjPaV1KNYg&s=10"}
               alt="Live Avatar Preview"
               className="w-24 h-24 rounded-full object-cover border-4 border-[#FFB648] shadow-inner"
               onError={(e) => {
-                e.target.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmyS4TygDepDH2AezAFSACrY7V3HuBaXl_Zq7E0d5jD-QW-7ZjPaV1KNY&s=10";
+                e.target.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmyS4TygDepDH2AezAFSACrY7V3HuBaXl_Zq7E0d5jD-QW-7ZjPaV1KNYg&s=10";
               }}
             />
           </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Sliders, ShieldCheck, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../../config/api";
 
 export default function HomeContent() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function HomeContent() {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/products");
+        const response = await axios.get(`${API_BASE_URL}/api/products`);
         // Take only available products, and slice to show only 3
         const available = response.data.filter((p) => p.availability === true);
         setFeaturedProducts(available.slice(0, 3));
