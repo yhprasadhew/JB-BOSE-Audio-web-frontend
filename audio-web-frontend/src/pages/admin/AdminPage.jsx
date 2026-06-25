@@ -6,7 +6,7 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 
-import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
+import { Link, NavLink, Routes, Route, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
 import ItemsAdmin from "./ItemsAdmin";
@@ -32,7 +32,7 @@ export default function AdminPage() {
         
         <div className="flex flex-col">
           {/* LOGO */}
-          <div className="px-6 py-6 border-b border-white/10 flex items-center gap-3">
+          <Link to="/" className="px-6 py-6 border-b border-white/10 flex items-center gap-3 hover:opacity-90 transition-opacity">
 
             {/* LOGO BAR ICON */}
             <div className="flex gap-[3px] items-end h-6">
@@ -43,12 +43,12 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <h1 className="text-lg font-bold">
+              <h1 className="text-lg font-bold text-white">
                 JB-BOSE <span className="text-[#FFB648]">Audio</span>
               </h1>
               <p className="text-xs text-gray-400">Admin Console</p>
             </div>
-          </div>
+          </Link>
 
           {/* NAVIGATION */}
           <div className="p-4 space-y-2">

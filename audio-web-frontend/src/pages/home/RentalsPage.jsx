@@ -159,7 +159,10 @@ Customer Message: ${message}`;
               className="bg-white rounded-2xl border border-black/5 overflow-hidden shadow-sm hover:shadow-xl hover:border-[#FFB648]/40 transition-all duration-300 flex flex-col group"
             >
               {/* Product Image */}
-              <div className="w-full h-64 bg-[#fbfbfb] p-6 flex items-center justify-center relative overflow-hidden border-b border-gray-50">
+              <div 
+                onClick={() => navigate(`/item/${product.key}`)}
+                className="w-full h-64 bg-[#fbfbfb] p-6 flex items-center justify-center relative overflow-hidden border-b border-gray-50 cursor-pointer"
+              >
                 <img
                   src={product.image?.[0] || "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg"}
                   alt={product.name}
@@ -176,7 +179,10 @@ Customer Message: ${message}`;
               {/* Product Info */}
               <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
-                  <h3 className="font-bold text-lg text-[#0B0F1A] line-clamp-1 group-hover:text-[#FFB648] transition-colors">
+                  <h3 
+                    onClick={() => navigate(`/item/${product.key}`)}
+                    className="font-bold text-lg text-[#0B0F1A] line-clamp-1 group-hover:text-[#FFB648] transition-colors cursor-pointer"
+                  >
                     {product.name}
                   </h3>
                   <p className="text-xs text-gray-400 font-medium font-mono">{product.dimension}</p>
@@ -193,7 +199,7 @@ Customer Message: ${message}`;
                     </p>
                   </div>
                   <button
-                    onClick={() => handleOpenBookingModal(product)}
+                    onClick={() => navigate(`/item/${product.key}`)}
                     className="px-5 py-2.5 bg-[#0B0F1A] text-white rounded-lg text-xs font-bold hover:bg-black transition duration-300 shadow-md hover:shadow-lg"
                   >
                     Rent Now

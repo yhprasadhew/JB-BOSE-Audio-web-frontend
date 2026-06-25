@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Edit, Image, Tag, Layers } from "lucide-react";
+import { Plus, Trash2, Edit, Image, Tag, Layers, X, Upload } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
+import { supabase } from "../../config/supabase";
 
 export default function ItemsAdmin() {
   const navigate = useNavigate();
@@ -17,7 +18,8 @@ export default function ItemsAdmin() {
   const [dimension, setDimension] = useState("");
   const [category, setCategory] = useState("Speakers");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const [type, setType] = useState("sale");
   const [adding, setAdding] = useState(false);
 
@@ -50,23 +52,56 @@ export default function ItemsAdmin() {
     fetchProducts();
   }, []);
 
+  const uploadImagesToSupabase = async (files) => {
+    const urls = [];
+    for (const file of files) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      const filePath = `listings/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("listings")
+        .upload(filePath, file);
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("listings")
+        .getPublicUrl(filePath);
+
+      urls.push(publicUrl);
+    }
+    return urls;
+  };
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setAdding(true);
 
-    const token = localStorage.getItem("token");
-    const payload = {
-      key,
-      name,
-      price: Number(price),
-      dimension,
-      category,
-      description,
-      image: [imageUrl || "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg"],
-      type,
-    };
-
     try {
+      let imageUrls = [];
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        imageUrls = await uploadImagesToSupabase(selectedFiles);
+        setUploading(false);
+      } else {
+        imageUrls = ["https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg"];
+      }
+
+      const token = localStorage.getItem("token");
+      const payload = {
+        key,
+        name,
+        price: Number(price),
+        dimension,
+        category,
+        description,
+        image: imageUrls,
+        type,
+      };
+
       await axios.post(`${API_BASE_URL}/api/products`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -77,14 +112,15 @@ export default function ItemsAdmin() {
       setPrice("");
       setDimension("");
       setDescription("");
-      setImageUrl("");
+      setSelectedFiles([]);
       setType("sale");
       fetchProducts();
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Failed to add product ❌");
+      toast.error(error.message || error.response?.data?.message || "Failed to add product ❌");
     } finally {
       setAdding(false);
+      setUploading(false);
     }
   };
 
@@ -205,14 +241,52 @@ export default function ItemsAdmin() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Image URL</label>
-              <input
-                type="url"
-                placeholder="https://example.com/item.png"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB648] transition-all bg-gray-50/50 focus:bg-white"
-              />
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 flex justify-between items-center">
+                <span>Upload Photos (PC)</span>
+                {selectedFiles.length > 0 && (
+                  <span className="text-[10px] text-gray-400 normal-case font-medium">
+                    {selectedFiles.length} file(s) selected
+                  </span>
+                )}
+              </label>
+              <div className="border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50/50 hover:bg-white hover:border-[#FFB648]/40 transition-colors flex flex-col items-center justify-center cursor-pointer relative group">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setSelectedFiles((prev) => [...prev, ...files]);
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                />
+                <Upload className="w-6 h-6 text-gray-400 group-hover:text-[#FFB648] transition-colors mb-1.5" />
+                <p className="text-xs font-semibold text-gray-600">Select files from computer</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Supports PNG, JPG, GIF</p>
+              </div>
+
+              {/* Preview Selected Files */}
+              {selectedFiles.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-3">
+                  {selectedFiles.map((file, idx) => {
+                    const objectUrl = URL.createObjectURL(file);
+                    return (
+                      <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                        <img src={objectUrl} alt="preview" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedFiles((prev) => prev.filter((_, i) => i !== idx));
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div>
@@ -232,7 +306,7 @@ export default function ItemsAdmin() {
               disabled={adding}
               className="w-full py-2.5 bg-[#0B0F1A] text-white rounded-lg font-semibold hover:bg-black transition-colors duration-300 disabled:opacity-50"
             >
-              {adding ? "Listing..." : "Add to Inventory"}
+              {adding ? (uploading ? "Uploading images..." : "Listing...") : "Add to Inventory"}
             </button>
           </form>
         </div>

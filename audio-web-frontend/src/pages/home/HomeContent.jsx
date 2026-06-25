@@ -179,7 +179,7 @@ export default function HomeContent() {
                         {product.type === "rental" && <span className="text-[10px] text-gray-400 font-normal"> /day</span>}
                       </p>
                       <button
-                        onClick={() => navigate(product.type === "rental" ? "/rentals" : "/products")}
+                        onClick={() => navigate(`/item/${product.key}`)}
                         className="px-4 py-2 bg-[#0B0F1A] text-white text-xs font-semibold rounded-lg hover:bg-black transition duration-300"
                       >
                         Details

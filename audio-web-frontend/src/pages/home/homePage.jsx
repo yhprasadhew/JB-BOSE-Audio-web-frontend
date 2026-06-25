@@ -7,6 +7,7 @@ import ContactPage from "./contactPage";
 import LoginPage from "../login/login";
 import RegisterPage from "../register/register";
 import EditProfilePage from "../profile/EditProfilePage";
+import ItemDetailsPage from "./ItemDetailsPage";
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="edit-profile" element={<EditProfilePage />} />
+        <Route path="item/:key" element={<ItemDetailsPage />} />
       </Routes>
     </div>
   );

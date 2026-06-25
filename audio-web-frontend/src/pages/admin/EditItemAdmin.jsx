@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Save, ArrowLeft, Loader2 } from "lucide-react";
+import { Save, ArrowLeft, Loader2, Upload, X } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
+import { supabase } from "../../config/supabase";
 
 export default function EditItemAdmin() {
   const { key } = useParams();
@@ -18,7 +19,9 @@ export default function EditItemAdmin() {
   const [dimension, setDimension] = useState("");
   const [category, setCategory] = useState("Speakers");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [images, setImages] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const [type, setType] = useState("sale");
 
   useEffect(() => {
@@ -37,7 +40,7 @@ export default function EditItemAdmin() {
           setDimension(foundProduct.dimension);
           setCategory(foundProduct.category || "Speakers");
           setDescription(foundProduct.description);
-          setImageUrl(foundProduct.image?.[0] || "");
+          setImages(foundProduct.image || []);
           setType(foundProduct.type || "sale");
         } else {
           toast.error("Product not found ❌");
@@ -55,22 +58,58 @@ export default function EditItemAdmin() {
     fetchProduct();
   }, [key, navigate]);
 
+  const uploadImagesToSupabase = async (files) => {
+    const urls = [];
+    for (const file of files) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      const filePath = `listings/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("listings")
+        .upload(filePath, file);
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("listings")
+        .getPublicUrl(filePath);
+
+      urls.push(publicUrl);
+    }
+    return urls;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
-    const token = localStorage.getItem("token");
-    const payload = {
-      name,
-      price: Number(price),
-      dimension,
-      category,
-      description,
-      image: [imageUrl || "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg"],
-      type,
-    };
-
     try {
+      let uploadedUrls = [];
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        uploadedUrls = await uploadImagesToSupabase(selectedFiles);
+        setUploading(false);
+      }
+
+      const finalImages = [...images, ...uploadedUrls];
+      if (finalImages.length === 0) {
+        finalImages.push("https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg");
+      }
+
+      const token = localStorage.getItem("token");
+      const payload = {
+        name,
+        price: Number(price),
+        dimension,
+        category,
+        description,
+        image: finalImages,
+        type,
+      };
+
       await axios.put(`${API_BASE_URL}/api/products/${key}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -78,9 +117,10 @@ export default function EditItemAdmin() {
       navigate("/admin/items");
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Failed to update product ❌");
+      toast.error(error.message || error.response?.data?.message || "Failed to update product ❌");
     } finally {
       setSaving(false);
+      setUploading(false);
     }
   };
 
@@ -182,28 +222,81 @@ export default function EditItemAdmin() {
             </div>
           </div>
 
+          {/* Existing Images */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Image URL</label>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB648] transition-all bg-gray-50/50 focus:bg-white"
-            />
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Existing Photos</label>
+            {images.length === 0 ? (
+              <p className="text-xs text-gray-400">No existing photos</p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {images.map((url, idx) => (
+                  <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                    <img src={url} alt="existing product" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImages((prev) => prev.filter((_, i) => i !== idx));
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition-colors"
+                      title="Remove image"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {imageUrl && (
-            <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center">
-              <img
-                src={imageUrl}
-                alt="Product Preview"
-                className="max-h-40 object-contain rounded-md"
-                onError={(e) => {
-                  e.target.src = "https://thumbs.dreamstime.com/b/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available-236105299.jpg";
+          {/* Upload New Images */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 flex justify-between items-center">
+              <span>Upload New Photos (PC)</span>
+              {selectedFiles.length > 0 && (
+                <span className="text-[10px] text-gray-400 normal-case font-medium">
+                  {selectedFiles.length} file(s) selected
+                </span>
+              )}
+            </label>
+            <div className="border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50/55 hover:bg-white hover:border-[#FFB648]/40 transition-colors flex flex-col items-center justify-center cursor-pointer relative group">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setSelectedFiles((prev) => [...prev, ...files]);
                 }}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
               />
+              <Upload className="w-6 h-6 text-gray-400 group-hover:text-[#FFB648] transition-colors mb-1.5" />
+              <p className="text-xs font-semibold text-gray-600">Select files from computer</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">Add more files to this listing</p>
             </div>
-          )}
+
+            {/* Preview Selected Files */}
+            {selectedFiles.length > 0 && (
+              <div className="grid grid-cols-4 gap-2 mt-3">
+                {selectedFiles.map((file, idx) => {
+                  const objectUrl = URL.createObjectURL(file);
+                  return (
+                    <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                      <img src={objectUrl} alt="preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedFiles((prev) => prev.filter((_, i) => i !== idx));
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Description</label>
@@ -230,7 +323,7 @@ export default function EditItemAdmin() {
               className="flex-1 py-3 bg-[#0B0F1A] text-white rounded-lg font-semibold hover:bg-black transition flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
             >
               <Save className="w-4 h-4" />
-              {saving ? "Saving Changes..." : "Save Product Details"}
+              {saving ? (uploading ? "Uploading images..." : "Saving Changes...") : "Save Product Details"}
             </button>
           </div>
         </form>
