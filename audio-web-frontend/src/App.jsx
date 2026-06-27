@@ -7,7 +7,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 
 function App() {
+
   return (
+       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
     <BrowserRouter>
       <Routes>
         <Route
@@ -29,6 +31,7 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 
