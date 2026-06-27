@@ -8,6 +8,8 @@ import LoginPage from "../login/login";
 import RegisterPage from "../register/register";
 import EditProfilePage from "../profile/EditProfilePage";
 import ItemDetailsPage from "./ItemDetailsPage";
+import ProtectedRoute from "../../components/ProtectedRoute";
+import PublicOnlyRoute from "../../components/PublicOnlyRoute";
 
 export default function HomePage() {
   return (
@@ -18,9 +20,30 @@ export default function HomePage() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="rentals" element={<RentalsPage />} />
         <Route path="contact" element={<ContactPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-        <Route path="edit-profile" element={<EditProfilePage />} />
+        <Route
+          path="login"
+          element={
+            <PublicOnlyRoute>
+              <LoginPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="register"
+          element={
+            <PublicOnlyRoute>
+              <RegisterPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="edit-profile"
+          element={
+            <ProtectedRoute>
+              <EditProfilePage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="item/:key" element={<ItemDetailsPage />} />
       </Routes>
     </div>

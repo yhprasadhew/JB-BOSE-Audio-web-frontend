@@ -2,14 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
+import { Menu, X } from "lucide-react";
 
 export default function Header() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdown and mobile menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -25,12 +27,13 @@ export default function Header() {
   const handleSignOut = () => {
     logout();
     setDropdownOpen(false);
+    setMobileMenuOpen(false);
     toast.success("Signed out successfully 👋");
     navigate("/");
   };
 
   return (
-    <header className="w-full h-20 bg-[#0B0F1A] text-white flex items-center justify-between px-8 md:px-12 sticky top-0 z-50 border-b border-white/10">
+    <header className="w-full h-20 bg-[#0B0F1A] text-white flex items-center justify-between px-6 md:px-12 sticky top-0 z-50 border-b border-white/10">
       
       {/* LOGO */}
       <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
@@ -46,7 +49,7 @@ export default function Header() {
         </h1>
       </Link>
 
-      {/* NAVIGATION */}
+      {/* NAVIGATION (DESKTOP) */}
       <nav className="hidden md:flex gap-10 text-sm font-medium text-white/80">
         <Link to="/" className="hover:text-[#FFB648] transition-colors">
           Home
@@ -65,7 +68,7 @@ export default function Header() {
         </Link>
       </nav>
 
-      {/* AUTH ACTIONS / USER PROFILE */}
+      {/* ACTIONS & PROFILE & MOBILE TOGGLE */}
       <div className="flex items-center gap-4 relative" ref={dropdownRef}>
         {user ? (
           <div className="relative">
@@ -128,7 +131,100 @@ export default function Header() {
             </Link>
           </div>
         )}
+
+        {/* MOBILE MENU TOGGLE BUTTON */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden p-2 text-white/80 hover:text-[#FFB648] focus:outline-none transition-colors duration-200"
+          aria-label="Toggle mobile menu"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      {/* MOBILE DRAWER */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute top-20 left-0 w-full bg-[#0B0F1A] border-b border-white/10 z-40 shadow-2xl py-6 px-6 animate-in slide-in-from-top duration-300">
+          <nav className="flex flex-col gap-4 text-base font-semibold">
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-white/80 hover:text-[#FFB648] transition-colors py-2 border-b border-white/5"
+            >
+              Home
+            </Link>
+            <Link
+              to="/products"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-white/80 hover:text-[#FFB648] transition-colors py-2 border-b border-white/5"
+            >
+              Products
+            </Link>
+            <Link
+              to="/rentals"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-white/80 hover:text-[#FFB648] transition-colors py-2 border-b border-white/5"
+            >
+              Rentals
+            </Link>
+            <Link
+              to="/contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-white/80 hover:text-[#FFB648] transition-colors py-2"
+            >
+              Contact
+            </Link>
+
+            {/* Auth options inside mobile menu when logged out */}
+            {!user && (
+              <div className="flex flex-col gap-3 pt-5 border-t border-white/10">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-lg text-sm font-semibold border border-white/20 text-white hover:bg-white/5 transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-lg text-sm font-semibold bg-[#FFB648] text-[#0B0F1A] hover:bg-[#ffc56e] transition shadow"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+
+            {/* Profile actions inside mobile menu when logged in */}
+            {user && (
+              <div className="flex flex-col gap-3 pt-5 border-t border-white/10">
+                <Link
+                  to="/edit-profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-white/80 hover:text-[#FFB648] text-sm font-semibold transition py-1"
+                >
+                  Edit Profile
+                </Link>
+                {user.role === "admin" && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-[#FFB648] text-sm font-bold transition py-1"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={handleSignOut}
+                  className="w-full text-left py-2 text-sm text-red-400 hover:text-red-300 font-semibold transition"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
