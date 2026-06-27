@@ -5,6 +5,7 @@ import HomePage from "./pages/home/homePage";
 import LoginPage from "./pages/login/login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
 
